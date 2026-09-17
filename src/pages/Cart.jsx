@@ -1,115 +1,59 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Header from '../components/layout/Header';
-import Footer from '../components/layout/Footer';
 import { useCart } from '../context/CartContext';
-import { formatPKR } from '../utils/formatters';
-import { Trash2, ShoppingBag } from 'lucide-react';
+import { Trash2, ArrowRight } from 'lucide-react';
 
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart, subtotal } = useCart();
 
+  if (cart.length === 0) {
+    return (
+      <div style={{ maxWidth: '800px', margin: '120px auto', textAlign: 'center', padding: '0 20px' }}>
+        <h2 className="editorial-title" style={{ fontSize: '2rem', marginBottom: '16px' }}>Your Shopping Bag is Empty</h2>
+        <p style={{ color: '#666', marginBottom: '32px' }}>Explore our botanical cleaning line and select your formulations.</p>
+        <Link to="/shop" className="btn-stun">Explore Shop</Link>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <Header />
-      <main className="container cart-page">
-        <h1>Your Shopping Cart</h1>
+    <div style={{ maxWidth: '1100px', margin: '60px auto', padding: '0 24px' }}>
+      <h1 className="editorial-title" style={{ fontSize: '2.5rem', marginBottom: '40px' }}>Shopping Bag</h1>
 
-        {cart.length === 0 ? (
-          <div className="empty-cart-view">
-            <ShoppingBag size={64} strokeWidth={1.5} color="var(--text-muted)" />
-            <h2>Your cart is currently empty</h2>
-            <p>Experience the ultimate clean with our specialized kits.</p>
-            <Link to="/shop" className="btn-primary">Start Shopping</Link>
-          </div>
-        ) : (
-          <div className="cart-grid">
-            <div className="cart-table-wrapper">
-              <table className="cart-table">
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Subtotal</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {cart.map(item => (
-                    <tr key={item.itemKey}>
-                      <td className="item-cell">
-                        <img src={item.image} alt={item.name} />
-                        <div>
-                          <strong>{item.name}</strong>
-                          {item.variantName && <span>Size: {item.variantName}</span>}
-                        </div>
-                      </td>
-                      <td>{formatPKR(item.price)}</td>
-                      <td>
-                        <div className="cart-qty-toggle">
-                          <button onClick={() => updateQuantity(item.itemKey, item.quantity - 1)}>-</button>
-                          <span>{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.itemKey, item.quantity + 1)}>+</button>
-                        </div>
-                      </td>
-                      <td><strong>{formatPKR(item.price * item.quantity)}</strong></td>
-                      <td>
-                        <button className="btn-remove" onClick={() => removeFromCart(item.itemKey)}>
-                          <Trash2 size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="cart-checkout-card">
-              <h3>Cart Summary</h3>
-              <div className="summary-row">
-                <span>Subtotal</span>
-                <span>{formatPKR(subtotal)}</span>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '48px' }}>
+        <div>
+          {cart.map(item => (
+            <div key={item.id} style={{ display: 'flex', gap: '20px', padding: '20px 0', borderBottom: '1px solid var(--color-border)' }}>
+              <img src={item.thumbnail} alt={item.name} style={{ width: '80px', height: '100px', objectFit: 'cover' }} />
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>{item.name}</h3>
+                <p style={{ margin: '6px 0', fontWeight: 700 }}>₨ {(item.salePrice || item.price).toLocaleString()}</p>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <button onClick={() => updateQuantity(item.id, -1)} style={{ padding: '2px 8px', border: '1px solid #ccc' }}>-</button>
+                  <span style={{ fontSize: '0.85rem' }}>{item.quantity}</span>
+                  <button onClick={() => updateQuantity(item.id, 1)} style={{ padding: '2px 8px', border: '1px solid #ccc' }}>+</button>
+                  <button onClick={() => removeFromCart(item.id)} style={{ marginLeft: 'auto', color: '#EF4444' }}><Trash2 size={16} /></button>
+                </div>
               </div>
-              <div className="summary-row">
-                <span>Shipping</span>
-                <span>{subtotal > 3000 ? 'FREE' : formatPKR(250)}</span>
-              </div>
-              <p className="shipping-note">Taxes & shipping verified during checkout.</p>
-              <Link to="/checkout" className="btn-primary btn-checkout-link">
-                Proceed to Checkout
-              </Link>
             </div>
-          </div>
-        )}
-      </main>
-      <Footer />
+          ))}
+        </div>
 
-      <style>{`
-        .cart-page { padding: 4rem 1.5rem; min-height: 60vh; }
-        .cart-page h1 { font-size: 2rem; font-weight: 900; margin-bottom: 2rem; color: var(--primary-navy); }
-        .empty-cart-view { text-align: center; padding: 4rem 0; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
-        .cart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 3rem; }
-        .cart-table { width: 100%; border-collapse: collapse; }
-        .cart-table th { text-align: left; padding-bottom: 1rem; border-bottom: 2px solid var(--border-light); font-size: 0.85rem; color: var(--text-muted); }
-        .cart-table td { padding: 1.5rem 0; border-bottom: 1px solid var(--border-light); }
-        .item-cell { display: flex; align-items: center; gap: 1.25rem; }
-        .item-cell img { width: 60px; height: 60px; object-fit: contain; }
-        .item-cell div { display: flex; flex-direction: column; }
-        .item-cell strong { font-size: 0.95rem; color: var(--primary-navy); }
-        .item-cell span { font-size: 0.8rem; color: var(--text-muted); }
-        .cart-qty-toggle { display: inline-flex; border: 1px solid var(--border-light); border-radius: 4px; }
-        .cart-qty-toggle button { padding: 0.25rem 0.6rem; font-weight: bold; }
-        .cart-qty-toggle span { padding: 0.25rem 0.6rem; }
-        .btn-remove { color: #94A3B8; }
-        .btn-remove:hover { color: var(--accent-red); }
-        .cart-checkout-card { background: white; border: 1px solid var(--border-light); padding: 2rem; border-radius: 8px; height: fit-content; }
-        .cart-checkout-card h3 { font-size: 1.25rem; font-weight: 800; margin-bottom: 1.5rem; }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 1rem; font-weight: 600; }
-        .shipping-note { font-size: 0.8rem; color: var(--text-muted); margin: 1.5rem 0; }
-        .btn-checkout-link { width: 100%; }
-        @media (max-width: 900px) { .cart-grid { grid-template-columns: 1fr; } }
-      `}</style>
+        <div style={{ background: '#FAF9F6', padding: '32px', border: '1px solid var(--color-border)', height: 'fit-content' }}>
+          <h3 className="editorial-sub" style={{ marginBottom: '20px' }}>Summary</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <span>Subtotal</span>
+            <span style={{ fontWeight: 700 }}>₨ {subtotal.toLocaleString()}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+            <span>Shipping</span>
+            <span>Calculated at checkout</span>
+          </div>
+          <Link to="/checkout" className="btn-stun" style={{ width: '100%' }}>
+            Proceed to Checkout <ArrowRight size={16} />
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

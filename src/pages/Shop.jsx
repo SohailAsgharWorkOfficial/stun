@@ -1,141 +1,95 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import Header from '../components/layout/Header';
-import Footer from '../components/layout/Footer';
-import ProductCard from '../components/product/ProductCard';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import ProductCard from '../components/ProductCard';
 
 export default function Shop() {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
+  const activeCategory = searchParams.get('category') || 'all';
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const selectedCategory = searchParams.get('category') || 'all';
-  const searchTerm = searchParams.get('search') || '';
-  const [sortBy, setSortBy] = useState('featured');
+  const categories = [
+    { label: 'All Formulations', value: 'all' },
+    { label: 'Floor Care', value: 'floor' },
+    { label: 'Surfaces', value: 'surface' },
+    { label: 'Glass Sparkle', value: 'glass' },
+    { label: 'Bathroom', value: 'bathroom' }
+  ];
 
   useEffect(() => {
-    async function loadShopData() {
+    async function load() {
       setLoading(true);
       try {
-        const prodSnap = await getDocs(collection(db, 'products'));
-        const catSnap = await getDocs(collection(db, 'categories'));
-
-        setProducts(prodSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-        setCategories(catSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-      } catch (err) {
-        console.error("Failed to load catalog:", err);
+        const snap = await getDocs(collection(db, 'products'));
+        let items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (items.length === 0) {
+          items = [
+            { id: '1', name: 'STUN Clean Floor Formula', price: 1250, category: 'floor', thumbnail: 'https://images.unsplash.com/photo-1585421514738-01798e348b17?auto=format&fit=crop&w=600&q=80' },
+            { id: '2', name: 'Surface Gloss Degreaser', price: 950, category: 'surface', thumbnail: 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?auto=format&fit=crop&w=600&q=80' },
+            { id: '3', name: 'Pure Botanical Glass Mist', price: 890, category: 'glass', thumbnail: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?auto=format&fit=crop&w=600&q=80' },
+            { id: '4', name: 'Bathroom Scale Purifier', price: 1400, category: 'bathroom', thumbnail: 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?auto=format&fit=crop&w=600&q=80' }
+          ];
+        }
+        setProducts(items);
+      } catch (e) {
+        console.error(e);
       } finally {
         setLoading(false);
       }
     }
-    loadShopData();
+    load();
   }, []);
 
-  const filtered = products.filter(p => {
-    if (!p.active) return false;
-    const matchesCategory = selectedCategory === 'all' || p.categorySlug === selectedCategory;
-    const matchesSearch = !searchTerm || 
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      p.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  }).sort((a, b) => {
-    if (sortBy === 'price-low') return a.price - b.price;
-    if (sortBy === 'price-high') return b.price - a.price;
-    return 0;
-  });
+  const displayed = activeCategory === 'all' 
+    ? products 
+    : products.filter(p => p.category?.toLowerCase() === activeCategory.toLowerCase());
 
   return (
-    <div className="page-shell">
-      <Header />
-      <main className="container shop-layout">
-        <aside className="shop-filters">
-          <div className="filter-block">
-            <h3>Categories</h3>
-            <ul>
-              <li 
-                className={selectedCategory === 'all' ? 'active' : ''} 
-                onClick={() => setSearchParams({ category: 'all' })}
-              >
-                All Cleaning Solutions
-              </li>
-              {categories.map(c => (
-                <li 
-                  key={c.id} 
-                  className={selectedCategory === c.slug ? 'active' : ''} 
-                  onClick={() => setSearchParams({ category: c.slug })}
-                >
-                  {c.name}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </aside>
+    <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '60px 40px' }}>
+      <div style={{ marginBottom: '40px' }}>
+        <span className="editorial-sub" style={{ color: '#888' }}>ARCHIVE COLLECTION</span>
+        <h1 className="editorial-title" style={{ fontSize: '2.5rem', marginTop: '8px' }}>STUN Formulations</h1>
+      </div>
 
-        <section className="shop-content">
-          <div className="shop-bar">
-            <span>Showing <strong>{filtered.length}</strong> products</span>
-            <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
-              <option value="featured">Featured First</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-            </select>
-          </div>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '40px' }}>
+        {categories.map(cat => (
+          <button
+            key={cat.value}
+            onClick={() => setSearchParams(cat.value === 'all' ? {} : { category: cat.value })}
+            style={{
+              padding: '8px 18px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              border: '1px solid',
+              borderColor: activeCategory === cat.value ? 'var(--color-dark)' : 'var(--color-border)',
+              background: activeCategory === cat.value ? 'var(--color-dark)' : 'transparent',
+              color: activeCategory === cat.value ? '#FFF' : 'var(--color-text)'
+            }}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
 
-          {loading ? (
-            <div className="loading-state">Loading store catalog...</div>
-          ) : filtered.length === 0 ? (
-            <div className="empty-state">No products found matching the criteria.</div>
-          ) : (
-            <div className="products-grid">
-              {filtered.map(p => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
-          )}
-        </section>
-      </main>
-      <Footer />
-
-      <style>{`
-        .shop-layout { display: grid; grid-template-columns: 240px 1fr; gap: 3rem; padding: 4rem 1.5rem; }
-        .filter-block h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem; }
-        .filter-block ul { list-style: none; }
-        .filter-block ul li {
-          padding: 0.6rem 0;
-          font-size: 0.9rem;
-          cursor: pointer;
-          color: var(--text-muted);
-          transition: var(--transition);
-        }
-        .filter-block ul li.active, .filter-block ul li:hover {
-          color: var(--primary-navy);
-          font-weight: 700;
-        }
-        .shop-bar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 2rem;
-          padding-bottom: 1rem;
-          border-bottom: 1px solid var(--border-light);
-        }
-        .shop-bar select {
-          padding: 0.5rem 1rem;
-          border: 1px solid var(--border-light);
-          border-radius: 4px;
-        }
-        .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-        @media (max-width: 900px) {
-          .shop-layout { grid-template-columns: 1fr; }
-          .products-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 550px) {
-          .products-grid { grid-template-columns: 1fr; }
-        }
-      `}</style>
+      {loading ? (
+        <p style={{ color: '#888' }}>Retrieving catalogue...</p>
+      ) : displayed.length === 0 ? (
+        <p style={{ color: '#888' }}>No formulations found in this category.</p>
+      ) : (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: '36px'
+        }}>
+          {displayed.map(prod => (
+            <ProductCard key={prod.id} product={prod} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

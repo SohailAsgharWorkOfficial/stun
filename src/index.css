@@ -1,102 +1,96 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
-  --primary-navy: #0B2545;
-  --primary-blue: #133E87;
-  --electric-cyan: #00D2FF;
-  --accent-orange: #F59E0B;
-  --accent-red: #E11D48;
-  --bg-neutral: #F8FAFC;
-  --card-bg: #FFFFFF;
-  --border-light: #E2E8F0;
-  --text-dark: #0F172A;
-  --text-muted: #64748B;
-  --success: #10B981;
-  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --color-bg: #FCFBFA;
+  --color-surface: #FFFFFF;
+  --color-surface-soft: #F4F3F0;
+  --color-text: #121212;
+  --color-text-muted: #666666;
+  --color-border: #E8E6E1;
+  --color-water-blue: #72B9D5;
+  --color-accent-cyan: #00D1D1;
+  --color-pink: #F472B6;
+  --color-coral: #F43F5E;
+  --color-amber: #F59E0B;
+  --color-dark: #111111;
+  
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 body {
-  background-color: var(--bg-neutral);
-  color: var(--text-dark);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 a {
-  text-decoration: none;
   color: inherit;
+  text-decoration: none;
 }
 
 button {
+  font-family: inherit;
   cursor: pointer;
   border: none;
   background: none;
-  font-family: inherit;
 }
 
-/* Base Utility Classes */
-.container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-}
-
-.btn-primary {
-  background: var(--primary-navy);
-  color: #fff;
+.editorial-title {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
   font-weight: 700;
-  padding: 0.85rem 1.75rem;
-  border-radius: 6px;
+  line-height: 1.05;
+}
+
+.editorial-sub {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.btn-stun {
+  background: var(--color-dark);
+  color: #fff;
+  padding: 14px 28px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  transition: all 0.3s var(--ease-editorial);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  transition: var(--transition);
+  gap: 8px;
+}
+
+.btn-stun:hover {
+  background: #2a2a2a;
+  transform: translateY(-1px);
+}
+
+.btn-stun-white {
+  background: #ffffff;
+  color: var(--color-dark);
+  padding: 14px 28px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.9rem;
+  transition: all 0.3s var(--ease-editorial);
 }
 
-.btn-primary:hover {
-  background: var(--primary-blue);
-  box-shadow: 0 4px 12px rgba(19, 62, 135, 0.35);
-}
-
-.btn-cyan {
-  background: var(--electric-cyan);
-  color: var(--primary-navy);
-  font-weight: 800;
-  padding: 0.85rem 1.75rem;
-  border-radius: 6px;
-  transition: var(--transition);
-  text-transform: uppercase;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-cyan:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 4px 14px rgba(0, 210, 255, 0.4);
-}
-
-.badge-discount {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: var(--primary-blue);
-  color: #fff;
-  padding: 0.25rem 0.6rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  border-radius: 4px;
+.btn-stun-white:hover {
+  background: #ebebeb;
 }

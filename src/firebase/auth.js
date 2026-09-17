@@ -2,44 +2,36 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut, 
-  sendPasswordResetEmail,
-  updateProfile
+  sendPasswordResetEmail 
 } from 'firebase/auth';
-import { auth, db } from './config';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from './config';
 
-export async function registerUserAccount(email, password, fullName) {
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  const user = userCredential.user;
-
-  await updateProfile(user, { displayName: fullName });
-
-  const profile = {
-    uid: user.uid,
-    fullName,
+export const registerUser = async (email, password, name = '', role = 'customer') => {
+  const cred = await createUserWithEmailAndPassword(auth, email, password);
+  await setDoc(doc(db, 'users', cred.user.uid), {
+    name,
     email,
-    role: 'customer',
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  };
+    role,
+    createdAt: serverTimestamp()
+  });
+  return cred.user;
+};
 
-  await setDoc(doc(db, 'users', user.uid), profile);
-  return { user, profile };
-}
+export const loginUser = async (email, password) => {
+  const cred = await signInWithEmailAndPassword(auth, email, password);
+  return cred.user;
+};
 
-export async function loginUserAccount(email, password) {
-  const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
-  return {
-    user: userCredential.user,
-    profile: userDoc.exists() ? userDoc.data() : null
-  };
-}
+export const logoutUser = async () => {
+  await signOut(auth);
+};
 
-export async function logoutUser() {
-  return await signOut(auth);
-}
+export const resetPassword = async (email) => {
+  await sendPasswordResetEmail(auth, email);
+};
 
-export async function requestPasswordReset(email) {
-  return await sendPasswordResetEmail(auth, email);
-}
+export const getUserProfile = async (uid) => {
+  const snap = await getDoc(doc(db, 'users', uid));
+  return snap.exists() ? snap.data() : null;
+};
