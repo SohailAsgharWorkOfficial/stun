@@ -9,21 +9,33 @@ export default function CartDrawer() {
   if (!isDrawerOpen) return null;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', justifyContent: 'flex-end' }}>
+    <div
+  style={{
+    position: 'fixed',
+    inset: 0,
+    zIndex: 9999, // Header se zyada hona zaroori hai
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    display: 'flex',
+    justifyContent: 'flex-end'
+  }}
+>
       <div 
         onClick={() => setIsDrawerOpen(false)} 
         style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(3px)' }} 
       />
-      <div style={{
-        position: 'relative',
-        width: '100%',
-        maxWidth: '440px',
-        height: '100%',
-        background: '#FFF',
-        display: 'flex',
-        flexDirection: 'column',
-        boxShadow: '-8px 0 24px rgba(0,0,0,0.1)'
-      }}>
+      <div
+    style={{
+      position: 'relative',
+      width: '100%',
+      maxWidth: '420px',
+      height: '100vh',
+      backgroundColor: '#FFFFFF',
+      zIndex: 10000,
+      display: 'flex',
+      flexDirection: 'column',
+      boxShadow: '-4px 0 25px rgba(0, 0, 0, 0.15)'
+    }}
+  >
         <div style={{ padding: '24px', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 className="editorial-title" style={{ fontSize: '1.25rem' }}>Your Bag</h3>
           <button onClick={() => setIsDrawerOpen(false)}><X size={20} /></button>

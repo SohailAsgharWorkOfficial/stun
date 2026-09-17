@@ -11,62 +11,204 @@ export default function SearchModal({ isOpen, onClose }) {
 
   useEffect(() => {
     if (isOpen) {
-      getDocs(collection(db, 'products')).then(snap => {
-        setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-      }).catch(console.error);
+      getDocs(collection(db, 'products'))
+        .then((snap) => {
+          setProducts(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        })
+        .catch(console.error);
+    } else {
+      setSearchTerm('');
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const filtered = products.filter(p => 
-    p.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = products.filter(
+    (p) =>
+      p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 70,
-      background: 'rgba(17, 17, 17, 0.75)', backdropFilter: 'blur(5px)',
-      display: 'flex', justifyContent: 'center', padding: '60px 20px'
-    }}>
-      <div style={{
-        background: '#FFFFFF', width: '100%', maxWidth: '640px',
-        maxHeight: '80vh', display: 'flex', flexDirection: 'column',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
-      }}>
-        <div style={{ padding: '20px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <Search size={20} color="#666" />
-          <input 
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(0, 0, 0, 0.55)',
+        backdropFilter: 'blur(3px)',
+        WebkitBackdropFilter: 'blur(3px)',
+        zIndex: 99999, // Header aur announcement bar ke upar
+        display: 'flex',
+        justifyContent: 'flex-start'
+      }}
+    >
+      {/* Slide-over White Drawer Panel */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          backgroundColor: '#FFFFFF',
+          width: '100%',
+          maxWidth: '520px',
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          boxShadow: '8px 0 35px rgba(0, 0, 0, 0.18)',
+          boxSizing: 'border-box'
+        }}
+      >
+        {/* Top Input Header (Fully visible & clean) */}
+        <div
+          style={{
+            padding: '24px 28px',
+            borderBottom: '1px solid #E5E7EB',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '14px',
+            backgroundColor: '#FFFFFF'
+          }}
+        >
+          <Search size={19} color="#111111" />
+          <input
             autoFocus
             type="text"
-            placeholder="Search floor cleaners, sprays, collections..." 
+            placeholder="Search floor cleaners, sprays, collections..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ flex: 1, border: 'none', outline: 'none', fontSize: '1rem', fontFamily: 'inherit' }}
+            style={{
+              flex: 1,
+              border: 'none',
+              outline: 'none',
+              fontSize: '15px',
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              color: '#111111',
+              backgroundColor: 'transparent'
+            }}
           />
-          <button onClick={onClose}><X size={20} /></button>
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#9CA3AF',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              <X size={16} />
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: '#111111',
+              padding: '4px',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            <X size={20} />
+          </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+        {/* Search Results Area */}
+        <div
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '24px 28px'
+          }}
+        >
           {searchTerm.trim() === '' ? (
-            <p style={{ color: '#888', fontSize: '0.85rem' }}>Start typing to search STUN formulations.</p>
+            <p
+              style={{
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                color: '#6B7280',
+                fontSize: '13px',
+                margin: 0
+              }}
+            >
+              Start typing to search STUN formulations.
+            </p>
           ) : filtered.length === 0 ? (
-            <p style={{ color: '#888', fontSize: '0.85rem' }}>No products found matching "{searchTerm}".</p>
+            <p
+              style={{
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                color: '#6B7280',
+                fontSize: '13px',
+                margin: 0
+              }}
+            >
+              No products found matching "{searchTerm}".
+            </p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {filtered.map(p => (
-                <div 
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {filtered.map((p) => (
+                <div
                   key={p.id}
-                  onClick={() => { navigate(`/products/${p.id}`); onClose(); }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '8px', cursor: 'pointer', borderBottom: '1px solid #f2f2f2' }}
+                  onClick={() => {
+                    navigate(`/products/${p.id}`);
+                    onClose();
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    padding: '12px 10px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F9FAFB')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                 >
-                  <img src={p.thumbnail || 'https://images.unsplash.com/photo-1585421514738-01798e348b17?auto=format&fit=crop&w=150&q=80'} alt="" style={{ width: '48px', height: '48px', objectFit: 'cover' }} />
+                  <img
+                    src={
+                      p.thumbnail ||
+                      p.image ||
+                      'https://images.unsplash.com/photo-1585421514738-01798e348b17?auto=format&fit=crop&w=150&q=80'
+                    }
+                    alt={p.name}
+                    style={{
+                      width: '52px',
+                      height: '52px',
+                      objectFit: 'cover',
+                      borderRadius: '6px',
+                      backgroundColor: '#F3F4F6'
+                    }}
+                  />
                   <div style={{ flex: 1 }}>
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600 }}>{p.name}</h4>
-                    <span style={{ fontSize: '0.8rem', color: '#666' }}>₨ {p.price}</span>
+                    <h4
+                      style={{
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        fontSize: '13.5px',
+                        fontWeight: 700,
+                        color: '#111111',
+                        margin: '0 0 4px 0'
+                      }}
+                    >
+                      {p.name}
+                    </h4>
+                    <span
+                      style={{
+                        fontFamily: "'Plus Jakarta Sans', sans-serif",
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: '#4B5563'
+                      }}
+                    >
+                      {typeof p.price === 'number' ? `₨ ${p.price.toLocaleString()}` : p.price}
+                    </span>
                   </div>
-                  <ArrowRight size={16} color="#888" />
+                  <ArrowRight size={16} color="#9CA3AF" />
                 </div>
               ))}
             </div>
