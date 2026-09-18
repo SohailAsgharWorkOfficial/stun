@@ -12,65 +12,72 @@ export default function WellnessBanner({
       style={{
         position: 'relative',
         width: '100%',
-        height: '82vh',
+        height: '84vh',
         minHeight: '520px',
-        maxHeight: '760px',
+        maxHeight: '780px',
         backgroundImage: `url("${imageSrc}")`,
         backgroundSize: 'cover',
-        backgroundPosition: 'center 45%',
+        backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden'
       }}
       className="wellness-banner-section"
     >
-      {/* Soft Vignette Overlay */}
+      {/* Soft Ambient Overlay */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'rgba(0, 0, 0, 0.08)'
+          background: 'rgba(0, 0, 0, 0.08)',
+          zIndex: 1
         }}
       />
 
-      {/* Content Layer (Single Line Text + Centered Button) */}
+      {/* Main Stack: Marquee Line on Top + Button Below */}
       <div
         style={{
           position: 'relative',
-          zIndex: 3,
+          zIndex: 5,
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '0 24px',
-          textAlign: 'center'
+          gap: '24px' // Marquee aur Button ke beech ka exact gap
         }}
       >
-        {/* Exact Bold Headline */}
-        <h2
+        {/* 1. INFINITE HORIZONTAL MARQUEE TRACK (Upper Row) */}
+        <div
           style={{
-            fontFamily: "'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif",
-            fontSize: 'clamp(2.4rem, 6.5vw, 5.8rem)',
-            fontWeight: 800,
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
-            color: '#FFFFFF',
-            lineHeight: 1,
-            margin: 0,
+            width: '100%',
+            overflow: 'hidden',
             whiteSpace: 'nowrap',
-            textShadow: '0 3px 20px rgba(0, 0, 0, 0.22)',
+            display: 'flex',
             userSelect: 'none'
           }}
-          className="wellness-title"
         >
-          {title}
-        </h2>
+          <div className="marquee-content">
+            {[...Array(6)].map((_, i) => (
+              <span key={i} className="marquee-item">
+                {title}
+              </span>
+            ))}
+          </div>
+          <div className="marquee-content" aria-hidden="true">
+            {[...Array(6)].map((_, i) => (
+              <span key={`clone-${i}`} className="marquee-item">
+                {title}
+              </span>
+            ))}
+          </div>
+        </div>
 
-        {/* Exact Compact Rounded Rectangle Button */}
-        <div style={{ marginTop: '20px' }}>
+        {/* 2. BUTTON LOCATED DIRECTLY UNDER MARQUEE (Lower Row) */}
+        <div>
           <Link
             to={buttonLink}
             style={{
@@ -80,15 +87,15 @@ export default function WellnessBanner({
               backgroundColor: '#FFFFFF',
               color: '#000000',
               fontFamily: "'Plus Jakarta Sans', sans-serif",
-              fontSize: '10px',
+              fontSize: '9.5px',
               fontWeight: 800,
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
               textDecoration: 'none',
-              padding: '8px 22px',
+              padding: '8px 24px',
               borderRadius: '4px',
-              border: '1px solid #000000',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+              border: '1px solid #111111',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.15)',
               transition: 'all 0.2s ease',
               cursor: 'pointer'
             }}
@@ -106,12 +113,35 @@ export default function WellnessBanner({
         </div>
       </div>
 
+      {/* Styles */}
       <style>{`
-        @media (max-width: 768px) {
-          .wellness-title {
-            white-space: normal !important;
-            font-size: 2.2rem !important;
-            line-height: 1.15 !important;
+        .marquee-content {
+          display: flex;
+          flex-shrink: 0;
+          align-items: center;
+          animation: marqueeScroll 60s linear infinite;
+        }
+
+        .marquee-item {
+          font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+          font-size: clamp(2.8rem, 7vw, 6rem);
+          font-weight: 800;
+          letterSpacing: 0.04em;
+          text-transform: uppercase;
+          color: #FFFFFF;
+          line-height: 1.05;
+          margin: 0;
+          padding: 0 45px;
+          text-shadow: 0 3px 25px rgba(0, 0, 0, 0.25);
+          white-space: nowrap;
+        }
+
+        @keyframes marqueeScroll {
+          0% {
+            transform: translateX(0%);
+          }
+          100% {
+            transform: translateX(-100%);
           }
         }
       `}</style>

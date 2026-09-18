@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, Search, User, ShoppingBag, X, Menu } from 'lucide-react';
 import Logo from './Logo';
@@ -8,12 +8,57 @@ export default function Header({ onOpenSearch }) {
   const cartContext = useCart();
   const itemCount = cartContext?.itemCount || 0;
   const setIsDrawerOpen = cartContext?.setIsDrawerOpen || (() => {});
-  
+
   const [showTopBar, setShowTopBar] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Smart Scroll States
+  const [isVisible, setIsVisible] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // 1. Check if user is past hero section threshold (approx 120px)
+      if (currentScrollY > 120) {
+        setIsScrolled(true);
+
+        // Scroll Down -> Hide Header
+        if (currentScrollY > lastScrollY.current && currentScrollY - lastScrollY.current > 5) {
+          setIsVisible(false);
+        }
+        // Scroll Up -> Show Header
+        else if (currentScrollY < lastScrollY.current && lastScrollY.current - currentScrollY > 5) {
+          setIsVisible(true);
+        }
+      } else {
+        // Hero section ke bilkul top par hamesha header visible rahega
+        setIsScrolled(false);
+        setIsVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 100 }}>
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        zIndex: 9999,
+        transform: isVisible ? 'translateY(0)' : 'translateY(-100%)',
+        transition: 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+        pointerEvents: isVisible ? 'auto' : 'none'
+      }}
+    >
       {/* 1. TOP BLACK ANNOUNCEMENT BAR */}
       {showTopBar && (
         <div
@@ -28,7 +73,6 @@ export default function Header({ onOpenSearch }) {
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '0 24px',
-            borderBottom: '1px solid rgba(255,255,255,0.08)',
             userSelect: 'none'
           }}
         >
@@ -57,6 +101,8 @@ export default function Header({ onOpenSearch }) {
             onClick={() => setShowTopBar(false)}
             aria-label="Close Announcement"
             style={{
+              background: 'none',
+              border: 'none',
               color: '#9CA3AF',
               display: 'flex',
               alignItems: 'center',
@@ -70,17 +116,19 @@ export default function Header({ onOpenSearch }) {
         </div>
       )}
 
-      {/* 2. MAIN HEADER BAR */}
+      {/* 2. MAIN HEADER BAR (Transparent Image Matched Style) */}
       <header
         style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.96)',
-          backdropFilter: 'blur(10px)',
-          borderBottom: '1px solid #E5E7EB',
-          height: '70px',
+          backgroundColor: isScrolled ? 'transparent' : 'transparent' ,
+          backdropFilter: isScrolled ? 'blur(22px)' : 'blur(22px)',
+          WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
+          borderBottom: isScrolled ? '1px solid rgba(0, 0, 0, 0.06)' : 'none',
+          height: '74px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 32px'
+          padding: '0 36px',
+          transition: 'background-color 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease'
         }}
       >
         {/* Left: Brand Logo */}
@@ -94,14 +142,14 @@ export default function Header({ onOpenSearch }) {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '26px'
+            gap: '28px'
           }}
         >
           <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
             <Link to="/shop" style={navLinkStyle}>
               SHOP
             </Link>
-            <ChevronDown size={14} strokeWidth={2.5} style={{ color: '#111' }} />
+            <ChevronDown size={14} strokeWidth={2.5} style={{ color: '#111111' }} />
           </div>
 
           <Link to="/about" style={navLinkStyle}>
@@ -141,10 +189,9 @@ export default function Header({ onOpenSearch }) {
               fontSize: '12px',
               fontWeight: 600,
               cursor: 'pointer',
-              color: '#111'
+              color: '#111111'
             }}
           >
-            <span style={{ fontSize: '15px' }}></span>
             <span>USD</span>
             <ChevronDown size={12} strokeWidth={2.5} />
           </div>
@@ -159,7 +206,7 @@ export default function Header({ onOpenSearch }) {
               fontSize: '12px',
               fontWeight: 600,
               cursor: 'pointer',
-              color: '#111',
+              color: '#111111',
               marginRight: '6px'
             }}
           >
@@ -172,18 +219,26 @@ export default function Header({ onOpenSearch }) {
             type="button"
             onClick={onOpenSearch}
             aria-label="Search"
-            style={{ padding: '6px', display: 'flex', alignItems: 'center', color: '#111', cursor: 'pointer' }}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              color: '#111111',
+              cursor: 'pointer'
+            }}
           >
-            <Search size={20} strokeWidth={1.75} />
+            <Search size={20} strokeWidth={1.85} />
           </button>
 
           {/* User Account */}
           <Link
             to="/account"
             aria-label="Account"
-            style={{ padding: '6px', display: 'flex', alignItems: 'center', color: '#111' }}
+            style={{ padding: '6px', display: 'flex', alignItems: 'center', color: '#111111' }}
           >
-            <User size={20} strokeWidth={1.75} />
+            <User size={20} strokeWidth={1.85} />
           </Link>
 
           {/* Cart Bag */}
@@ -191,17 +246,26 @@ export default function Header({ onOpenSearch }) {
             type="button"
             onClick={() => setIsDrawerOpen(true)}
             aria-label="Shopping Bag"
-            style={{ position: 'relative', padding: '6px', display: 'flex', alignItems: 'center', color: '#111', cursor: 'pointer' }}
+            style={{
+              position: 'relative',
+              background: 'none',
+              border: 'none',
+              padding: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              color: '#111111',
+              cursor: 'pointer'
+            }}
           >
-            <ShoppingBag size={20} strokeWidth={1.75} />
+            <ShoppingBag size={20} strokeWidth={1.85} />
             {itemCount > 0 && (
               <span
                 style={{
                   position: 'absolute',
                   top: '1px',
                   right: '0px',
-                  backgroundColor: '#111',
-                  color: '#FFF',
+                  backgroundColor: '#111111',
+                  color: '#FFFFFF',
                   borderRadius: '50%',
                   fontSize: '10px',
                   fontWeight: 700,
@@ -223,7 +287,14 @@ export default function Header({ onOpenSearch }) {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="mobile-hamburger"
             aria-label="Toggle Navigation"
-            style={{ display: 'none', padding: '6px', color: '#111', cursor: 'pointer' }}
+            style={{
+              background: 'none',
+              border: 'none',
+              display: 'none',
+              padding: '6px',
+              color: '#111111',
+              cursor: 'pointer'
+            }}
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -253,7 +324,7 @@ export default function Header({ onOpenSearch }) {
         </div>
       )}
 
-      {/* Responsive Viewport CSS */}
+      {/* Responsive Styles */}
       <style>{`
         @media (max-width: 1080px) {
           .desktop-navigation { display: none !important; }
@@ -263,7 +334,7 @@ export default function Header({ onOpenSearch }) {
         @media (max-width: 768px) {
           .hide-tablet { display: none !important; }
           .hide-laptop { display: none !important; }
-          header { padding: 0 16px !important; }
+          header { padding: 0 18px !important; }
         }
         @media (max-width: 600px) {
           .hide-mobile { display: none !important; }
